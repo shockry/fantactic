@@ -59,25 +59,25 @@ function update() {
   // if (star.body.x >= box.body.x && star.body.width + star.body.x <= box.body.x + box.body.width) {
   //   // console.log("Yeah");
   //   // box.body.moves = false;
+
   if (box.blow) {
-    const distance = box.body.y - star.body.y;
-    const distanceSquare = distance * distance;
-    // console.log((2000 / (distanceSquare)) % game.world.height);
-    // console.log(200 / distanceSquare);
-    star.body.velocity.y = -2000000 / distanceSquare;// % game.world.height;
+    move('up', 20000);
   } else if (box.soak) {
-    const distance = box.body.y - star.body.y;
-    const distanceSquare = distance * distance;
-    // console.log((2000 / (distanceSquare)) % game.world.height);
-    // console.log(200 / distanceSquare);
-    star.body.velocity.y = 2000000 / distanceSquare;// % game.world.height;
-  } else {
-    star.body.velocity.y = 0;
+    move('down', 20000);
   }
-  // }
-  // else {
-  //   box.body.moves = true;
-  // }
+}
+
+function move(direction, force) {
+  const distance = box.body.y - star.body.y;
+  const distanceSquare = distance * distance;
+  const fanforce = force / distanceSquare;
+  if (direction === 'up') {
+    star.y -= fanforce;
+  } else {
+    if (distance > fanforce) {
+      star.y += fanforce;
+    }
+  }
 }
 
 function onDown(key) {
