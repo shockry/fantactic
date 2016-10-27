@@ -24,7 +24,8 @@ function create () {
   box = boxes.create(game.world.width/2,
     game.world.height - game.cache.getImage('box').height, 'box');
   box.body.immovable = true;
-  box.running = false;
+  box.blow = false;
+  box.soak = false;
   // box.body.checkCollision.down = false;
   // box.inputEnabled = true;
   // box.input.enableDrag();
@@ -32,7 +33,7 @@ function create () {
   stars = game.add.group();
   stars.enableBody = true;
 
-  star = stars.create(game.world.width/2 + 100, 200, 'star');
+  star = stars.create(game.world.width/2 + 100, 400, 'star');
   // star.scale.setTo(2, 2);
   // star.inputEnabled = true;
   // star.input.enableDrag();
@@ -58,11 +59,21 @@ function update() {
   // if (star.body.x >= box.body.x && star.body.width + star.body.x <= box.body.x + box.body.width) {
   //   // console.log("Yeah");
   //   // box.body.moves = false;
-  //   const distance = box.body.y - star.body.y;
-  //   const distanceSquare = distance * distance;
-  //   // console.log((2000 / (distanceSquare)) % game.world.height);
-  //   // console.log(200 / distanceSquare);
-  //   star.body.velocity.y -= 10000 / distanceSquare;// % game.world.height;
+  if (box.blow) {
+    const distance = box.body.y - star.body.y;
+    const distanceSquare = distance * distance;
+    // console.log((2000 / (distanceSquare)) % game.world.height);
+    // console.log(200 / distanceSquare);
+    star.body.velocity.y = -2000000 / distanceSquare;// % game.world.height;
+  } else if (box.soak) {
+    const distance = box.body.y - star.body.y;
+    const distanceSquare = distance * distance;
+    // console.log((2000 / (distanceSquare)) % game.world.height);
+    // console.log(200 / distanceSquare);
+    star.body.velocity.y = 2000000 / distanceSquare;// % game.world.height;
+  } else {
+    star.body.velocity.y = 0;
+  }
   // }
   // else {
   //   box.body.moves = true;
@@ -83,13 +94,23 @@ function onUp(key) {
 }
 
 function onPress(key) {
-  if (!box.running) {
-    star.body.velocity.y = -20;
-    box.running = true;
+  if (key === 'w') {
+    box.soak = false;
+    box.blow = true;
+  } else if (key === 's') {
+    box.blow = false;
+    box.soak = true;
   } else {
-    star.body.velocity.y = 0;
-    box.running = false;
+    box.blow = false;
+    box.soak = false;
   }
+  // if (!box.running) {
+  //   // star.body.velocity.y = -20;
+  //   box.running = true;
+  // } else {
+  //   // star.body.velocity.y = 20;
+  //   box.running = false;
+  // }
 }
 
 function dragStart(star) {
