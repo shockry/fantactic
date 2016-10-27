@@ -21,48 +21,75 @@ function create () {
   boxes = game.add.group();
   boxes.enableBody = true;
 
-  box = boxes.create(game.world.width - game.cache.getImage('box').width, 200, 'box');
+  box = boxes.create(game.world.width/2,
+    game.world.height - game.cache.getImage('box').height, 'box');
   box.body.immovable = true;
-  box.body.checkCollision.down = false;
-  box.inputEnabled = true;
-  box.input.enableDrag();
+  box.running = false;
+  // box.body.checkCollision.down = false;
+  // box.inputEnabled = true;
+  // box.input.enableDrag();
 
   stars = game.add.group();
   stars.enableBody = true;
 
-  star = stars.create(200, 100, 'star');
-  star.scale.setTo(2, 2);
-  star.inputEnabled = true;
-  star.input.enableDrag();
-  star.body.gravity.y = 160;
-  // star.body.bounce.x = 0.2;
-  // star.body.bounce.y = 0.2;
+  star = stars.create(game.world.width/2 + 100, 200, 'star');
+  // star.scale.setTo(2, 2);
+  // star.inputEnabled = true;
+  // star.input.enableDrag();
+  // star.body.gravity.y = 160;
+  star.body.bounce.x = 0.2;
+  star.body.bounce.y = 0.2;
   star.body.collideWorldBounds = true;
 
-  star.events.onDragStart.add(dragStart, this);
-  star.events.onDragStop.add(dragStop, this);
+  game.input.keyboard.addCallbacks(this, onDown, onUp, onPress);
 
-  box.events.onDragStart.add(dragStart, this);
-  box.events.onDragStop.add(dragStop, this);
-  box.events.onDragUpdate.add(dragUpdate, this);
+  // star.events.onDragStart.add(dragStart, this);
+  // star.events.onDragStop.add(dragStop, this);
+
+  // box.events.onDragStart.add(dragStart, this);
+  // box.events.onDragStop.add(dragStop, this);
+  // box.events.onDragUpdate.add(dragUpdate, this);
 }
 
 function update() {
-  // game.physics.arcade.collide(stars, boxes, collectStar, null, this);
+  game.physics.arcade.collide(stars, boxes);//, collectStar, null, this);
   // game.debug.body(box);
   // console.log(star.y, box.y); 239, 139
-  if (star.body.x >= box.body.x && star.body.width + star.body.x <= box.body.x + box.body.width) {
-    // console.log("Yeah");
-    // box.body.moves = false;
-    const distance = box.body.y - star.body.y;
-    const distanceSquare = distance * distance;
-    // console.log((2000 / (distanceSquare)) % game.world.height);
-    // console.log(200 / distanceSquare);
-    star.body.velocity.y -= 10000 / distanceSquare;// % game.world.height;
-  }
+  // if (star.body.x >= box.body.x && star.body.width + star.body.x <= box.body.x + box.body.width) {
+  //   // console.log("Yeah");
+  //   // box.body.moves = false;
+  //   const distance = box.body.y - star.body.y;
+  //   const distanceSquare = distance * distance;
+  //   // console.log((2000 / (distanceSquare)) % game.world.height);
+  //   // console.log(200 / distanceSquare);
+  //   star.body.velocity.y -= 10000 / distanceSquare;// % game.world.height;
+  // }
   // else {
   //   box.body.moves = true;
   // }
+}
+
+function onDown(key) {
+  // if (key.keyIdentifier === 'Up') {
+  //   star.body.velocity.y = -20;
+  // }
+}
+
+function onUp(key) {
+  // console.log(key.key);
+  // if (key.keyIdentifier === 'Up') {
+  //   star.body.velocity.y = 0;
+  // }
+}
+
+function onPress(key) {
+  if (!box.running) {
+    star.body.velocity.y = -20;
+    box.running = true;
+  } else {
+    star.body.velocity.y = 0;
+    box.running = false;
+  }
 }
 
 function dragStart(star) {
