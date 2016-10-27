@@ -24,6 +24,7 @@ function create () {
   box = boxes.create(game.world.width - game.cache.getImage('box').width, 200, 'box');
   box.body.immovable = true;
   box.body.checkCollision.down = false;
+  // box.body.maxVelocity = 200;
   box.inputEnabled = true;
   box.input.enableDrag();
 
@@ -34,7 +35,7 @@ function create () {
   star.scale.setTo(2, 2);
   star.inputEnabled = true;
   star.input.enableDrag();
-  star.body.gravity.y = 160;
+  star.body.gravity.y = 500;
   // star.body.bounce.x = 0.2;
   // star.body.bounce.y = 0.2;
   star.body.collideWorldBounds = true;
@@ -49,7 +50,8 @@ function create () {
 
 function update() {
   // game.physics.arcade.collide(stars, boxes, collectStar, null, this);
-  // game.debug.body(box);
+  // game.physics.arcade.overlap(stars, boxes, collectStar, null, this);
+  game.debug.body(box);
   // console.log(star.y, box.y); 239, 139
   if (star.body.x >= box.body.x && star.body.width + star.body.x <= box.body.x + box.body.width) {
     // console.log("Yeah");
@@ -58,11 +60,13 @@ function update() {
     const distanceSquare = distance * distance;
     // console.log((2000 / (distanceSquare)) % game.world.height);
     // console.log(200 / distanceSquare);
-    star.body.velocity.y -= 10000 / distanceSquare;// % game.world.height;
+    // console.log(star.body.y);
+    star.body.velocity.y = -500 / distanceSquare;// / distanceSquare;// % game.world.height;
+    // console.log(star.body.velocity.y);
   }
-  // else {
-  //   box.body.moves = true;
-  // }
+  else {
+    // box.body.moves = true;
+  }
 }
 
 function dragStart(star) {
@@ -84,9 +88,9 @@ function dragStop(star) {
 }
 
 function dragUpdate(box) {
-  if (box.body.y > (star.body.y+star.body.height)) {
-    box.body.y = star.body.y+star.body.height + 10;
-  }
+  // if (box.body.y > (star.body.y+star.body.height)) {
+  //   box.body.y = star.body.y+star.body.height + 10;
+  // }
 }
 
 function collectStar(star, box) {
