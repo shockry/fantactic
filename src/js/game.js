@@ -6,7 +6,7 @@ const game = new Phaser.Game(800, 600, Phaser.AUTO, '',
     {preload: preload, create: create, update: update});
 
 let stars;
-let boxes, box, star;
+let boxes, star;
 
 function preload () {
   game.load.image('star', 'src/assets/images/star.png');
@@ -21,14 +21,8 @@ function create () {
   boxes = game.add.group();
   boxes.enableBody = true;
 
-  box = boxes.create(game.world.width/2,
-    game.world.height - game.cache.getImage('box').height, 'box');
-  box.body.immovable = true;
-  box.blow = false;
-  box.soak = false;
-  // box.body.checkCollision.down = false;
-  // box.inputEnabled = true;
-  // box.input.enableDrag();
+  createBox({x: game.world.width/2, y: game.world.height - game.cache.getImage('box').height},
+    'bottomFan')
 
   stars = game.add.group();
   stars.enableBody = true;
@@ -53,22 +47,24 @@ function create () {
 }
 
 function update() {
-  game.physics.arcade.collide(stars, boxes);//, collectStar, null, this);
+  // game.physics.arcade.collide(stars, boxes);//, collectStar, null, this);
   // game.debug.body(box);
   // console.log(star.y, box.y); 239, 139
   // if (star.body.x >= box.body.x && star.body.width + star.body.x <= box.body.x + box.body.width) {
   //   // console.log("Yeah");
   //   // box.body.moves = false;
 
-  if (box.blow) {
+  const activeFan = boxes.getTop();
+  if (activeFan.blow) {
     move('up', 20000);
-  } else if (box.soak) {
+  } else if (activeFan.soak) {
     move('down', 20000);
   }
 }
 
 function move(direction, force) {
-  const distance = box.body.y - star.body.y;
+  const activeFan = boxes.getTop();
+  const distance = activeFan.body.y - star.body.y;
   const distanceSquare = distance * distance;
   const fanforce = force / distanceSquare;
   if (direction === 'up') {
@@ -78,6 +74,26 @@ function move(direction, force) {
       star.y += fanforce;
     }
   }
+}
+
+function createBox(position, name, rotation = 0) {
+  // box = boxes.create(game.world.width/2,
+  //   game.world.height - game.cache.getImage('box').height, 'box');
+
+  const box = boxes.create(position.x, position.y, 'box');
+
+  box.name = name;
+  box.rotation = rotation;
+  box.body.immovable = true;
+  box.blow = false;
+  box.soak = false;
+
+  box.bringToTop();
+
+  return box;
+  // box.body.checkCollision.down = false;
+  // box.inputEnabled = true;
+  // box.input.enableDrag();
 }
 
 function onDown(key) {
@@ -94,15 +110,16 @@ function onUp(key) {
 }
 
 function onPress(key) {
+  const activeFan = boxes.getTop();
   if (key === 'w') {
-    box.soak = false;
-    box.blow = true;
+    activeFan.soak = false;
+    activeFan.blow = true;
   } else if (key === 's') {
-    box.blow = false;
-    box.soak = true;
+    activeFan.blow = false;
+    activeFan.soak = true;
   } else {
-    box.blow = false;
-    box.soak = false;
+    activeFan.blow = false;
+    activeFan.soak = false;
   }
   // if (!box.running) {
   //   // star.body.velocity.y = -20;
