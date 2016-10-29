@@ -22,6 +22,7 @@ function create () {
   boxes.enableBody = true;
   boxes.inputEnableChildren = true;
   boxes.onChildInputUp.add(setActiveFan, this);
+  boxes.enableCollide = true;
 
   createBox({x: game.world.width/2, y: 0},
     'topFan', 180);
@@ -52,14 +53,14 @@ function create () {
 }
 
 function update() {
-  // game.physics.arcade.collide(stars, boxes);//, collectStar, null, this);
+  game.physics.arcade.collide(stars, boxes);//, collectStar, ()=>boxes.enableCollide);//, null, this);
   // game.debug.body(box);
   // console.log(star.y, box.y); 239, 139
   // if (star.body.x >= box.body.x && star.body.width + star.body.x <= box.body.x + box.body.width) {
   //   // console.log("Yeah");
   //   // box.body.moves = false;
 
-  const activeFan = boxes.getTop();
+  const activeFan = getActiveFan();
   game.debug.body(activeFan);
   if (activeFan.name === 'topFan') {
     if (activeFan.blow) {
@@ -77,17 +78,40 @@ function update() {
 }
 
 function move(direction, force) {
-  const activeFan = boxes.getTop();
-  const distance = activeFan.body.y - star.body.y;
-  const distanceSquare = distance * distance;
-  const fanforce = force / distanceSquare;
-  if (direction === 'up') {
-    if (Math.abs(distance) > fanforce) {
-      star.y -= fanforce;
+  const activeFan = getActiveFan();
+
+  if (star.body.x >= activeFan.body.x &&
+    star.body.width + star.body.x <= activeFan.body.x + activeFan.body.width) {
+    const distance = activeFan.body.y - star.body.y;
+    const distanceSquare = distance * distance;
+    const fanforce = force / distanceSquare;
+
+    if (activeFan.name === 'bottomFan') {
+      if (direction === 'up') {
+        star.y -= fanforce;
+      } else {
+        if (distance - star.body.height > star.body.height + fanforce) {
+          star.y += fanforce;
+        }
+      }
+    } else if (activeFan.name === 'topFan') {
+      if (direction === 'up') {
+        if (star.body.y > activeFan.body.height) {
+          star.y -= fanforce;
+        }
+      } else {
+          star.y += fanforce;
+      }
     }
-  } else {
-    if (distance > fanforce) {
-      star.y += fanforce;
+
+    if (direction === 'up') {
+      if (Math.abs(distance) > fanforce) {
+        star.y -= fanforce;
+      }
+    } else {
+      if (distance > fanforce) {
+        star.y += fanforce;
+      }
     }
   }
 }
@@ -114,6 +138,7 @@ function createBox(position, name, rotation = 0) {
 }
 
 function setActiveFan(fan) {
+  stopActiveFan();
   fan.bringToTop();
 }
 
@@ -131,7 +156,8 @@ function onUp(key) {
 }
 
 function onPress(key) {
-  const activeFan = boxes.getTop();
+  boxes.enableCollide = true;
+  const activeFan = getActiveFan();
   if (key === 'w') {
     activeFan.soak = false;
     activeFan.blow = true;
@@ -139,8 +165,7 @@ function onPress(key) {
     activeFan.blow = false;
     activeFan.soak = true;
   } else {
-    activeFan.blow = false;
-    activeFan.soak = false;
+    stopActiveFan();
   }
   // if (!box.running) {
   //   // star.body.velocity.y = -20;
@@ -149,6 +174,16 @@ function onPress(key) {
   //   // star.body.velocity.y = 20;
   //   box.running = false;
   // }
+}
+
+function stopActiveFan(blow = true, soak = true) {
+  const activeFan = getActiveFan();
+  if (blow) {
+    activeFan.blow = false;
+  }
+  if (soak) {
+    activeFan.soak = false;
+  }
 }
 
 function dragStart(star) {
@@ -177,4 +212,11 @@ function dragUpdate(box) {
 
 function collectStar(star, box) {
   // star.kill();
+  // if (box !== boxes.getTop())
+  const activeFan = getActiveFan();
+  stopActiveFan(activeFan.blow, activeFan.soak);
+}
+
+function getActiveFan() {
+  return boxes.getTop();
 }
