@@ -20,9 +20,14 @@ function create () {
 
   boxes = game.add.group();
   boxes.enableBody = true;
+  boxes.inputEnableChildren = true;
+  boxes.onChildInputUp.add(setActiveFan, this);
+
+  createBox({x: game.world.width/2, y: 0},
+    'topFan', 180);
 
   createBox({x: game.world.width/2, y: game.world.height - game.cache.getImage('box').height},
-    'bottomFan')
+      'bottomFan');
 
   stars = game.add.group();
   stars.enableBody = true;
@@ -55,10 +60,19 @@ function update() {
   //   // box.body.moves = false;
 
   const activeFan = boxes.getTop();
-  if (activeFan.blow) {
-    move('up', 20000);
-  } else if (activeFan.soak) {
-    move('down', 20000);
+  game.debug.body(activeFan);
+  if (activeFan.name === 'topFan') {
+    if (activeFan.blow) {
+      move('down', 20000);
+    } else if (activeFan.soak) {
+      move('up', 20000);
+    }
+  } else {
+    if (activeFan.blow) {
+      move('up', 20000);
+    } else if (activeFan.soak) {
+      move('down', 20000);
+    }
   }
 }
 
@@ -68,7 +82,9 @@ function move(direction, force) {
   const distanceSquare = distance * distance;
   const fanforce = force / distanceSquare;
   if (direction === 'up') {
-    star.y -= fanforce;
+    if (Math.abs(distance) > fanforce) {
+      star.y -= fanforce;
+    }
   } else {
     if (distance > fanforce) {
       star.y += fanforce;
@@ -80,20 +96,25 @@ function createBox(position, name, rotation = 0) {
   // box = boxes.create(game.world.width/2,
   //   game.world.height - game.cache.getImage('box').height, 'box');
 
-  const box = boxes.create(position.x, position.y, 'box');
+  const box = boxes.create(position.x + game.cache.getImage('box').width/2,
+      position.y + game.cache.getImage('box').height/2, 'box');
 
   box.name = name;
-  box.rotation = rotation;
+  box.anchor.setTo(0.5, 0.5);
   box.body.immovable = true;
+  box.body.allowRotation = true;
+  box.angle = rotation;
   box.blow = false;
   box.soak = false;
-
-  box.bringToTop();
 
   return box;
   // box.body.checkCollision.down = false;
   // box.inputEnabled = true;
   // box.input.enableDrag();
+}
+
+function setActiveFan(fan) {
+  fan.bringToTop();
 }
 
 function onDown(key) {
