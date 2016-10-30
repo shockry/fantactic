@@ -12,6 +12,7 @@ function preload () {
   game.load.image('star', 'src/assets/images/star.png');
   game.load.image('sky', 'src/assets/images/sky.png');
   game.load.image('box', 'src/assets/images/carton-box.png');
+  game.load.image('box-rotated', 'src/assets/images/carton-box-rotated.png');
 }
 
 function create () {
@@ -25,10 +26,13 @@ function create () {
   boxes.enableCollide = true;
 
   createBox({x: game.world.width/2, y: 0},
-    'topFan', 180);
+    'topFan', 'box', 180);
 
   createBox({x: game.world.width/2, y: game.world.height - game.cache.getImage('box').height},
-      'bottomFan');
+      'bottomFan', 'box');
+
+  createBox({x: 0, y: game.world.height/2 - game.cache.getImage('box-rotated').height/2},
+      'rightFan', 'box-rotated');
 
   stars = game.add.group();
   stars.enableBody = true;
@@ -116,17 +120,17 @@ function move(direction, force) {
   }
 }
 
-function createBox(position, name, rotation = 0) {
+function createBox(position, name, img, rotation = 0) {
   // box = boxes.create(game.world.width/2,
   //   game.world.height - game.cache.getImage('box').height, 'box');
 
-  const box = boxes.create(position.x + game.cache.getImage('box').width/2,
-      position.y + game.cache.getImage('box').height/2, 'box');
+  const box = boxes.create(position.x + game.cache.getImage(img).width/2,
+      position.y + game.cache.getImage(img).height/2, img);
 
   box.name = name;
   box.anchor.setTo(0.5, 0.5);
   box.body.immovable = true;
-  box.body.allowRotation = true;
+  // box.body.allowRotation = true;
   box.angle = rotation;
   box.blow = false;
   box.soak = false;
