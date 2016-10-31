@@ -65,15 +65,15 @@ function update() {
   game.debug.body(activeFan);
   if (activeFan.name === 'sideFan') {
     if (activeFan.blow) {
-      move('right', 20000);
+      move('right', activeFan.force);
     } else if (activeFan.soak) {
-      move('left', 20000);
+      move('left', activeFan.force);
     }
   } else {
     if (activeFan.blow) {
-      move('up', 20000);
+      move('up', activeFan.force);
     } else if (activeFan.soak) {
-      move('down', 20000);
+      move('down', activeFan.force);
     }
   }
 }
@@ -111,6 +111,8 @@ function move(direction, force) {
         if (activeFan.width < (star.x - fanforce)) {
           star.x -= fanforce;
         } else {
+          //If the intended soak force will be greater than the space
+          //left between the target and the fan, travel that distance and halt
           star.x -= distance;
           stopActiveFan(false, true);
         }
@@ -133,6 +135,8 @@ function createBox(position, name, img, rotation = 0) {
   box.angle = rotation;
   box.blow = false;
   box.soak = false;
+  box.force = 20000;
+  box.defaultForce = 20000;
 
   return box;
   // box.body.checkCollision.down = false;
@@ -145,37 +149,29 @@ function setActiveFan(fan) {
   fan.bringToTop();
 }
 
-function onDown(key) {
-  // if (key.keyIdentifier === 'Up') {
-  //   star.body.velocity.y = -20;
-  // }
-}
-
-function onUp(key) {
-  // console.log(key.key);
-  // if (key.keyIdentifier === 'Up') {
-  //   star.body.velocity.y = 0;
-  // }
-}
-
 function onPress(key) {
   const activeFan = getActiveFan();
-  if (key === 'w') {
-    activeFan.soak = false;
-    activeFan.blow = true;
-  } else if (key === 's') {
-    activeFan.blow = false;
-    activeFan.soak = true;
-  } else {
-    stopActiveFan();
+  switch (key) {
+    case 'w':
+      activeFan.soak = false;
+      activeFan.blow = true;
+      break;
+    case 's':
+      activeFan.blow = false;
+      activeFan.soak = true;
+      break;
+    case '1':
+      activeFan.force = activeFan.defaultForce;
+      break;
+    case '2':
+      activeFan.force = activeFan.defaultForce * 2;
+      break;
+    case '3':
+      activeFan.force = activeFan.defaultForce * 3;
+      break;
+    default:
+      stopActiveFan();
   }
-  // if (!box.running) {
-  //   // star.body.velocity.y = -20;
-  //   box.running = true;
-  // } else {
-  //   // star.body.velocity.y = 20;
-  //   box.running = false;
-  // }
 }
 
 function stopActiveFan(blow = true, soak = true) {
@@ -186,37 +182,6 @@ function stopActiveFan(blow = true, soak = true) {
   if (soak) {
     activeFan.soak = false;
   }
-}
-
-function dragStart(star) {
-  star.body.moves = false;
-  // star.dragX = star.x;
-  // star.dragY = star.y;
-  // star.dragTime = new Date();
-  // console.log(`(${star.x}, ${star.y})`);
-}
-
-function dragStop(star) {
-  star.body.moves = true;
-  // const timeDelta = Date.now() - star.dragTime;
-  // const velocityX = (star.x - star.dragX) - (timeDelta % 10);
-  // const velocityY = (star.y - star.dragY) - (timeDelta % 10);
-  //
-  // star.body.velocity.setTo(velocityX, velocityY);
-  // console.log(`(${star.x}, ${star.y})`);
-}
-
-function dragUpdate(box) {
-  if (box.body.y > (star.body.y+star.body.height)) {
-    box.body.y = star.body.y+star.body.height + 10;
-  }
-}
-
-function collectStar(star, box) {
-  // star.kill();
-  // if (box !== boxes.getTop())
-  // const activeFan = getActiveFan();
-  // stopActiveFan(activeFan.blow, activeFan.soak);
 }
 
 function getActiveFan() {
