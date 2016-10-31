@@ -25,25 +25,22 @@ function create () {
   boxes.onChildInputUp.add(setActiveFan, this);
   boxes.enableCollide = true;
 
-  createBox({x: game.world.width/2, y: 0},
-    'topFan', 'box', 180);
-
   createBox({x: game.world.width/2, y: game.world.height - game.cache.getImage('box').height},
       'bottomFan', 'box');
 
   createBox({x: 0, y: game.world.height/2 - game.cache.getImage('box-rotated').height/2},
-      'rightFan', 'box-rotated');
+      'sideFan', 'box-rotated');
 
   stars = game.add.group();
   stars.enableBody = true;
 
-  star = stars.create(game.world.width/2 + 100, 400, 'star');
+  star = stars.create(game.world.width/2, 400, 'star');
   // star.scale.setTo(2, 2);
   // star.inputEnabled = true;
   // star.input.enableDrag();
   // star.body.gravity.y = 160;
-  star.body.bounce.x = 0.2;
-  star.body.bounce.y = 0.2;
+  // star.body.bounce.x = 0.2;
+  // star.body.bounce.y = 0.2;
   star.body.collideWorldBounds = true;
 
   game.input.keyboard.addCallbacks(this, onDown, onUp, onPress);
@@ -57,7 +54,7 @@ function create () {
 }
 
 function update() {
-  game.physics.arcade.collide(stars, boxes);//, collectStar, ()=>boxes.enableCollide);//, null, this);
+  // game.physics.arcade.collide(stars, boxes);//, collectStar, ()=>boxes.enableCollide);//, null, this);
   // game.debug.body(box);
   // console.log(star.y, box.y); 239, 139
   // if (star.body.x >= box.body.x && star.body.width + star.body.x <= box.body.x + box.body.width) {
@@ -66,11 +63,11 @@ function update() {
 
   const activeFan = getActiveFan();
   game.debug.body(activeFan);
-  if (activeFan.name === 'topFan') {
+  if (activeFan.name === 'sideFan') {
     if (activeFan.blow) {
-      move('down', 20000);
+      move('right', 20000);
     } else if (activeFan.soak) {
-      move('up', 20000);
+      move('left', 20000);
     }
   } else {
     if (activeFan.blow) {
@@ -84,11 +81,20 @@ function update() {
 function move(direction, force) {
   const activeFan = getActiveFan();
 
-  if (star.body.x >= activeFan.body.x &&
-    star.body.width + star.body.x <= activeFan.body.x + activeFan.body.width) {
-    const distance = activeFan.body.y - star.body.y;
-    const distanceSquare = distance * distance;
-    const fanforce = force / distanceSquare;
+  if ((star.body.x >= activeFan.body.x &&
+    star.body.width + star.body.x <= activeFan.body.x + activeFan.body.width) ||
+    (star.body.y >= activeFan.body.y &&
+      star.body.height + star.body.y <= activeFan.body.y + activeFan.body.height)) {
+
+    const distance = activeFan.name === 'bottomFan'? activeFan.body.y - star.body.y:
+      star.body.x - activeFan.body.width;
+    // distance = distance < 1? star.width: distance;
+    const distanceSquare = 1 + distance * distance;
+    // distanceSquare = distanceSquare < 1? star.width: distanceSquare;
+
+    let fanforce = force / distanceSquare;
+    // setting a maximum to avoid teleposrting to the end of the world
+    fanforce = fanforce > star.width? star.width: fanforce;
 
     if (activeFan.name === 'bottomFan') {
       if (direction === 'up') {
@@ -98,23 +104,16 @@ function move(direction, force) {
           star.y += fanforce;
         }
       }
-    } else if (activeFan.name === 'topFan') {
-      if (direction === 'up') {
-        if (star.body.y > activeFan.body.height) {
-          star.y -= fanforce;
-        }
+    } else { //Side fan
+      if (direction === 'right') {
+          star.x += fanforce;
       } else {
-          star.y += fanforce;
-      }
-    }
-
-    if (direction === 'up') {
-      if (Math.abs(distance) > fanforce) {
-        star.y -= fanforce;
-      }
-    } else {
-      if (distance > fanforce) {
-        star.y += fanforce;
+        if (activeFan.width < (star.x - fanforce)) {
+          star.x -= fanforce;
+        } else {
+          star.x -= distance;
+          stopActiveFan(false, true);
+        }
       }
     }
   }
@@ -160,7 +159,6 @@ function onUp(key) {
 }
 
 function onPress(key) {
-  boxes.enableCollide = true;
   const activeFan = getActiveFan();
   if (key === 'w') {
     activeFan.soak = false;
@@ -217,8 +215,8 @@ function dragUpdate(box) {
 function collectStar(star, box) {
   // star.kill();
   // if (box !== boxes.getTop())
-  const activeFan = getActiveFan();
-  stopActiveFan(activeFan.blow, activeFan.soak);
+  // const activeFan = getActiveFan();
+  // stopActiveFan(activeFan.blow, activeFan.soak);
 }
 
 function getActiveFan() {
