@@ -43,7 +43,7 @@ function create () {
   // star.body.bounce.y = 0.2;
   star.body.collideWorldBounds = true;
 
-  game.input.keyboard.addCallbacks(this, onDown, onUp, onPress);
+  game.input.keyboard.addCallbacks(this, null, null, onPress);
 
   // star.events.onDragStart.add(dragStart, this);
   // star.events.onDragStop.add(dragStop, this);
@@ -100,8 +100,13 @@ function move(direction, force) {
       if (direction === 'up') {
         star.y -= fanforce;
       } else {
-        if (distance - star.body.height > star.body.height + fanforce) {
+        if (distance - star.height > fanforce) {
           star.y += fanforce;
+        } else {
+          //If the intended soak force will be greater than the space
+          //left between the target and the fan, travel that distance and halt
+          stopActiveFan(false, true);
+          star.y += distance - star.body.height;
         }
       }
     } else { //Side fan
