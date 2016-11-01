@@ -23,13 +23,12 @@ function create () {
   boxes.enableBody = true;
   boxes.inputEnableChildren = true;
   boxes.onChildInputUp.add(setActiveFan, this);
-  boxes.enableCollide = true;
-
-  createBox({x: game.world.width/2, y: game.world.height - game.cache.getImage('box').height},
-      'bottomFan', 'box');
 
   createBox({x: 0, y: game.world.height/2 - game.cache.getImage('box-rotated').height/2},
-      'sideFan', 'box-rotated');
+        'sideFan', 'box-rotated');
+
+  createBox({x: game.world.width/2, y: game.world.height - game.cache.getImage('box').height},
+      'bottomFan', 'box', {active: true});
 
   stars = game.add.group();
   stars.enableBody = true;
@@ -62,7 +61,7 @@ function update() {
   //   // box.body.moves = false;
 
   const activeFan = getActiveFan();
-  game.debug.body(activeFan);
+  // game.debug.body(activeFan);
   if (activeFan.name === 'sideFan') {
     if (activeFan.blow) {
       move('right', activeFan.force);
@@ -126,7 +125,7 @@ function move(direction, force) {
   }
 }
 
-function createBox(position, name, img, rotation = 0) {
+function createBox(position, name, img, {rotation = 0, active = false} = {}) {
   // box = boxes.create(game.world.width/2,
   //   game.world.height - game.cache.getImage('box').height, 'box');
 
@@ -143,6 +142,14 @@ function createBox(position, name, img, rotation = 0) {
   box.force = 20000;
   box.defaultForce = 20000;
 
+  //Last active one is the only active
+  if (active) {
+    boxes.forEach(function(fan) {
+      setFanTint(fan, 0xFFFFFF);
+    });
+    setFanTint(box, 0x48f442);
+  }
+
   return box;
   // box.body.checkCollision.down = false;
   // box.inputEnabled = true;
@@ -150,8 +157,17 @@ function createBox(position, name, img, rotation = 0) {
 }
 
 function setActiveFan(fan) {
+  //Revert current active fan properties
   stopActiveFan();
+  const currentActiveFan = getActiveFan();
+  currentActiveFan.tint = 0xFFFFFF;
+  //Set new active fan
   fan.bringToTop();
+  setFanTint(fan, 0x48f442);
+}
+
+function setFanTint(fan, tint) {
+  fan.tint = tint;
 }
 
 function onPress(key) {
