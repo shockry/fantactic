@@ -54,14 +54,9 @@ function create () {
 
 function update() {
   // game.physics.arcade.collide(stars, boxes);//, collectStar, ()=>boxes.enableCollide);//, null, this);
-  // game.debug.body(box);
-  // console.log(star.y, box.y); 239, 139
-  // if (star.body.x >= box.body.x && star.body.width + star.body.x <= box.body.x + box.body.width) {
-  //   // console.log("Yeah");
-  //   // box.body.moves = false;
 
   const activeFan = getActiveFan();
-  // game.debug.body(activeFan);
+  game.debug.body(activeFan);
   if (activeFan.name === 'sideFan') {
     if (activeFan.blow) {
       move('right', activeFan.force);
@@ -112,7 +107,7 @@ function move(direction, force) {
       if (direction === 'right') {
           star.x += fanforce;
       } else {
-        if (activeFan.width < (star.x - fanforce)) {
+        if (distance > fanforce) {
           star.x -= fanforce;
         } else {
           //If the intended soak force will be greater than the space
@@ -126,9 +121,6 @@ function move(direction, force) {
 }
 
 function createBox(position, name, img, {rotation = 0, active = false} = {}) {
-  // box = boxes.create(game.world.width/2,
-  //   game.world.height - game.cache.getImage('box').height, 'box');
-
   const box = boxes.create(position.x + game.cache.getImage(img).width/2,
       position.y + game.cache.getImage(img).height/2, img);
 
