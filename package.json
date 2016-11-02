@@ -4,7 +4,8 @@
   "description": "Catch objects with the box",
   "main": "game.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "up": "webpack | python -m SimpleHTTPServer 8000"
   },
   "keywords": [
     "phaser"
