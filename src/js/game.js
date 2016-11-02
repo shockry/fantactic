@@ -80,41 +80,38 @@ function move(direction, force) {
     (star.body.y >= activeFan.body.y &&
       star.body.height + star.body.y <= activeFan.body.y + activeFan.body.height)) {
 
-    const distance = activeFan.name === 'bottomFan'? activeFan.body.y - star.body.y:
+    const distance = activeFan.name === 'bottomFan'?
+      activeFan.body.y - (star.body.y + star.body.height):
       star.body.x - activeFan.body.width;
-    // distance = distance < 1? star.width: distance;
+
     const distanceSquare = 1 + distance * distance;
     // distanceSquare = distanceSquare < 1? star.width: distanceSquare;
 
     let fanforce = force / distanceSquare;
-    // setting a maximum to avoid teleposrting to the end of the world
+    // setting a maximum to avoid teleporting to the end of the world
     fanforce = fanforce > star.width? star.width: fanforce;
 
-    if (activeFan.name === 'bottomFan') {
-      if (direction === 'up') {
-        star.y -= fanforce;
+    if (direction === 'up') {
+      star.y -= fanforce;
+    } else if (direction === 'down') {
+      if (distance > fanforce) {
+        star.y += fanforce;
       } else {
-        if (distance - star.height > fanforce) {
-          star.y += fanforce;
-        } else {
-          //If the intended soak force will be greater than the space
-          //left between the target and the fan, travel that distance and halt
-          stopActiveFan(false, true);
-          star.y += distance - star.body.height;
-        }
+        //If the intended soak force will be greater than the space
+        //left between the target and the fan, travel that distance and halt
+        stopActiveFan(false, true);
+        star.y += distance;
       }
-    } else { //Side fan
-      if (direction === 'right') {
-          star.x += fanforce;
+    } else if (direction === 'right') {
+        star.x += fanforce;
+    } else if (direction === 'left') {
+      if (distance > fanforce) {
+        star.x -= fanforce;
       } else {
-        if (distance > fanforce) {
-          star.x -= fanforce;
-        } else {
-          //If the intended soak force will be greater than the space
-          //left between the target and the fan, travel that distance and halt
-          star.x -= distance;
-          stopActiveFan(false, true);
-        }
+        //If the intended soak force will be greater than the space
+        //left between the target and the fan, travel that distance and halt
+        star.x -= distance;
+        stopActiveFan(false, true);
       }
     }
   }
