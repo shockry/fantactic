@@ -1,12 +1,18 @@
 import 'pixi';
 import 'p2';
-import Phaser from 'phaser'
+import Phaser from 'phaser';
+import {doOperation} from './lib/mathEffect';
 
 const game = new Phaser.Game(800, 600, Phaser.AUTO, '',
     {preload: preload, create: create, update: update});
 
 let stars;
 let boxes, star;
+
+const directionInfo = {'up': {axis: 'y', operator: '-'},
+                      'down': {axis: 'y', operator: '+'},
+                      'left': {axis: 'x', operator: '-'},
+                      'right': {axis: 'x', operator: '+'}};
 
 function preload () {
   game.load.image('star', 'src/assets/images/star.png');
@@ -75,6 +81,7 @@ function update() {
 function move(direction, force) {
   const activeFan = getActiveFan();
 
+  //Check if the target is in the range of one of the fans
   if ((star.body.x >= activeFan.body.x &&
     star.body.width + star.body.x <= activeFan.body.x + activeFan.body.width) ||
     (star.body.y >= activeFan.body.y &&
@@ -85,36 +92,35 @@ function move(direction, force) {
       star.body.x - activeFan.body.width;
 
     const distanceSquare = 1 + distance * distance;
-    // distanceSquare = distanceSquare < 1? star.width: distanceSquare;
 
     let fanforce = force / distanceSquare;
     // setting a maximum to avoid teleporting to the end of the world
     fanforce = fanforce > star.width? star.width: fanforce;
 
-    if (direction === 'up') {
-      star.y -= fanforce;
-    } else if (direction === 'down') {
-      if (distance > fanforce) {
-        star.y += fanforce;
-      } else {
-        //If the intended soak force will be greater than the space
-        //left between the target and the fan, travel that distance and halt
-        stopActiveFan(false, true);
-        star.y += distance;
-      }
-    } else if (direction === 'right') {
-        star.x += fanforce;
-    } else if (direction === 'left') {
-      if (distance > fanforce) {
-        star.x -= fanforce;
-      } else {
-        //If the intended soak force will be greater than the space
-        //left between the target and the fan, travel that distance and halt
-        star.x -= distance;
-        stopActiveFan(false, true);
-      }
+    /*If the intended soak force will be greater than the space
+    left between the target and the fan, just travel that distance and halt */
+    const amountToTravel = distance < fanforce && activeFan.soak?
+        distance: fanforce;
+
+    //Increase/decrease the x or y of the target by the amount to travel.
+    //Depends on the current direction
+    const actionInfo = directionInfo[direction];
+
+    moveTarget(star, actionInfo, amountToTravel);
+
+    //If collided with a fan or the world boundaries, stop whatever you're doing
+    if ((distance === 0 && activeFan.soak) ||
+      ((star.y <= 0 || star.x + star.width >= game.world.width) &&
+        activeFan.blow)) {
+      stopActiveFan(activeFan.blow, activeFan.soak);
     }
   }
+}
+
+function moveTarget(target, actionInfo, amountToTravel) {
+  target[actionInfo.axis] =
+    doOperation(actionInfo.operator,
+      target[actionInfo.axis], amountToTravel);
 }
 
 function createBox(position, name, img, {rotation = 0, active = false} = {}) {
