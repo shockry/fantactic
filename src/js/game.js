@@ -2,12 +2,12 @@ import 'pixi';
 import 'p2';
 import Phaser from 'phaser';
 import {doOperation} from './lib/mathEffect';
+import Fan from './Fan';
 
-const game = new Phaser.Game(800, 600, Phaser.AUTO, '',
+export const game = new Phaser.Game(800, 600, Phaser.AUTO, '',
     {preload: preload, create: create, update: update});
 
-let stars;
-let boxes, star;
+let star;
 
 const directionInfo = {'up': {axis: 'y', operator: '-'},
                       'down': {axis: 'y', operator: '+'},
@@ -25,18 +25,15 @@ function create () {
   game.physics.startSystem(Phaser.Physics.ARCADE);
   const sky = game.add.sprite(0, 0, 'sky');
 
-  boxes = game.add.group();
-  boxes.enableBody = true;
-  boxes.inputEnableChildren = true;
-  boxes.onChildInputUp.add(setActiveFan, this);
+  Fan.init();
 
-  createBox({x: 0, y: game.world.height/2 - game.cache.getImage('box-rotated').height/2},
+  Fan.createFan({x: 0, y: game.world.height/2 - game.cache.getImage('box-rotated').height/2},
         'sideFan', 'box-rotated');
 
-  createBox({x: game.world.width/2, y: game.world.height - game.cache.getImage('box').height},
+  Fan.createFan({x: game.world.width/2, y: game.world.height - game.cache.getImage('box').height},
       'bottomFan', 'box', {active: true});
 
-  stars = game.add.group();
+  const stars = game.add.group();
   stars.enableBody = true;
 
   star = stars.create(game.world.width/2, 400, 'star');
@@ -50,9 +47,6 @@ function create () {
 
   game.input.keyboard.addCallbacks(this, null, null, onPress);
 
-  // star.events.onDragStart.add(dragStart, this);
-  // star.events.onDragStop.add(dragStop, this);
-
   // box.events.onDragStart.add(dragStart, this);
   // box.events.onDragStop.add(dragStop, this);
   // box.events.onDragUpdate.add(dragUpdate, this);
@@ -61,7 +55,7 @@ function create () {
 function update() {
   // game.physics.arcade.collide(stars, boxes);//, collectStar, ()=>boxes.enableCollide);//, null, this);
 
-  const activeFan = getActiveFan();
+  const activeFan = Fan.activeFan;
   game.debug.body(activeFan);
   if (activeFan.name === 'sideFan') {
     if (activeFan.blow) {
@@ -79,7 +73,7 @@ function update() {
 }
 
 function move(direction, force) {
-  const activeFan = getActiveFan();
+  const activeFan = Fan.activeFan;
 
   //Check if the target is in the range of one of the fans
   if ((star.body.x >= activeFan.body.x &&
@@ -112,7 +106,7 @@ function move(direction, force) {
     if ((distance === 0 && activeFan.soak) ||
       ((star.y <= 0 || star.x + star.width >= game.world.width) &&
         activeFan.blow)) {
-      stopActiveFan(activeFan.blow, activeFan.soak);
+      Fan.stopActiveFan(activeFan.blow, activeFan.soak);
     }
   }
 }
@@ -123,50 +117,9 @@ function moveTarget(target, actionInfo, amountToTravel) {
       target[actionInfo.axis], amountToTravel);
 }
 
-function createBox(position, name, img, {rotation = 0, active = false} = {}) {
-  const box = boxes.create(position.x + game.cache.getImage(img).width/2,
-      position.y + game.cache.getImage(img).height/2, img);
-
-  box.name = name;
-  box.anchor.setTo(0.5, 0.5);
-  box.body.immovable = true;
-  // box.body.allowRotation = true;
-  box.angle = rotation;
-  box.blow = false;
-  box.soak = false;
-  box.force = 20000;
-  box.defaultForce = 20000;
-
-  //Last active one is the only active
-  if (active) {
-    boxes.forEach(function(fan) {
-      setFanTint(fan, 0xFFFFFF);
-    });
-    setFanTint(box, 0x48f442);
-  }
-
-  return box;
-  // box.body.checkCollision.down = false;
-  // box.inputEnabled = true;
-  // box.input.enableDrag();
-}
-
-function setActiveFan(fan) {
-  //Revert current active fan properties
-  stopActiveFan();
-  const currentActiveFan = getActiveFan();
-  currentActiveFan.tint = 0xFFFFFF;
-  //Set new active fan
-  fan.bringToTop();
-  setFanTint(fan, 0x48f442);
-}
-
-function setFanTint(fan, tint) {
-  fan.tint = tint;
-}
 
 function onPress(key) {
-  const activeFan = getActiveFan();
+  const activeFan = Fan.activeFan;
   switch (key) {
     case 'w':
       activeFan.soak = false;
@@ -186,20 +139,6 @@ function onPress(key) {
       activeFan.force = activeFan.defaultForce * 3;
       break;
     default:
-      stopActiveFan();
+      Fan.stopActiveFan();
   }
-}
-
-function stopActiveFan(blow = true, soak = true) {
-  const activeFan = getActiveFan();
-  if (blow) {
-    activeFan.blow = false;
-  }
-  if (soak) {
-    activeFan.soak = false;
-  }
-}
-
-function getActiveFan() {
-  return boxes.getTop();
 }

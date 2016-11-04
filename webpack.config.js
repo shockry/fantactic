@@ -7,7 +7,7 @@ pixi = path.join(phaserModule, 'build/custom/pixi.js'),
 p2 = path.join(phaserModule, 'build/custom/p2.js');
 
 module.exports = {
-  entry: './src/js/game.js',
+  entry: ['./src/js/game.js'],
   output: {
     path: './dist',
     filename: 'game.bundle.js'
