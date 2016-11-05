@@ -1,5 +1,5 @@
 import {game} from './game';
-//Maybe add default force to the thingy
+//TODO: Maybe add default force to the group itself
 let fans;
 
 function init() {
@@ -23,6 +23,7 @@ function createFan(position, name, img, {rotation = 0, active = false} = {}) {
   fan.blow = false;
   fan.soak = false;
   fan.force = 20000;
+  //Initial force (to control fan speed based on this number)
   fan.defaultForce = 20000;
 
   //Last active one is the only active

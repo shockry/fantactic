@@ -7,21 +7,22 @@ import Fan from './Fan';
 export const game = new Phaser.Game(800, 600, Phaser.AUTO, '',
     {preload: preload, create: create, update: update});
 
-let star;
+let star, collectables, stars;
 
 const directionInfo = {'up': {axis: 'y', operator: '-'},
                       'down': {axis: 'y', operator: '+'},
                       'left': {axis: 'x', operator: '-'},
                       'right': {axis: 'x', operator: '+'}};
 
-function preload () {
+function preload() {
   game.load.image('star', 'src/assets/images/star.png');
   game.load.image('sky', 'src/assets/images/sky.png');
   game.load.image('box', 'src/assets/images/carton-box.png');
   game.load.image('box-rotated', 'src/assets/images/carton-box-rotated.png');
+  game.load.image('collectable', 'src/assets/images/jelly.png');
 }
 
-function create () {
+function create() {
   game.physics.startSystem(Phaser.Physics.ARCADE);
   const sky = game.add.sprite(0, 0, 'sky');
 
@@ -33,7 +34,14 @@ function create () {
   Fan.createFan({x: game.world.width/2, y: game.world.height - game.cache.getImage('box').height},
       'bottomFan', 'box', {active: true});
 
-  const stars = game.add.group();
+  collectables = game.add.group();
+  collectables.enableBody = true;
+
+  collectables.create(game.world.width/2 + 100, 400, 'collectable');
+
+  collectables.create(game.world.width/2 + 100, 300, 'collectable');
+
+  stars = game.add.group();
   stars.enableBody = true;
 
   star = stars.create(game.world.width/2, 400, 'star');
@@ -54,9 +62,10 @@ function create () {
 
 function update() {
   // game.physics.arcade.collide(stars, boxes);//, collectStar, ()=>boxes.enableCollide);//, null, this);
+  game.physics.arcade.collide(stars, collectables, collect);
 
   const activeFan = Fan.activeFan;
-  game.debug.body(activeFan);
+  // game.debug.body(activeFan);
   if (activeFan.name === 'sideFan') {
     if (activeFan.blow) {
       move('right', activeFan.force);
@@ -140,5 +149,13 @@ function onPress(key) {
       break;
     default:
       Fan.stopActiveFan();
+  }
+}
+
+function collect(target, collectable) {
+  collectable.destroy();
+  if (collectables.length === 0) {
+    Fan.stopActiveFan();
+    console.log("YOU WIN, buddy!");
   }
 }
