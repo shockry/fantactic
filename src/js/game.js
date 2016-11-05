@@ -7,7 +7,7 @@ import Fan from './Fan';
 export const game = new Phaser.Game(800, 600, Phaser.AUTO, '',
     {preload: preload, create: create, update: update});
 
-let star, collectables, stars;
+let star, collectables, stars, cursors;
 
 const directionInfo = {'up': {axis: 'y', operator: '-'},
                       'down': {axis: 'y', operator: '+'},
@@ -53,7 +53,8 @@ function create() {
   // star.body.bounce.y = 0.2;
   star.body.collideWorldBounds = true;
 
-  game.input.keyboard.addCallbacks(this, null, null, onPress);
+  game.input.keyboard.addCallbacks(this, null, onKeyUp);
+  cursors = game.input.keyboard.createCursorKeys();
 
   // box.events.onDragStart.add(dragStart, this);
   // box.events.onDragStop.add(dragStop, this);
@@ -72,11 +73,23 @@ function update() {
     } else if (activeFan.soak) {
       move('left', activeFan.force);
     }
+    //Moving the fan itself
+    if (cursors.up.isDown) {
+      Fan.activeFan.y -= 2;
+    } else if (cursors.down.isDown) {
+      Fan.activeFan.y += 2;
+    }
   } else {
     if (activeFan.blow) {
       move('up', activeFan.force);
     } else if (activeFan.soak) {
       move('down', activeFan.force);
+    }
+    //Moving the fan itself
+    if (cursors.right.isDown) {
+      Fan.activeFan.x += 2;
+    } else if (cursors.left.isDown) {
+      Fan.activeFan.x -= 2;
     }
   }
 }
@@ -126,28 +139,28 @@ function moveTarget(target, actionInfo, amountToTravel) {
       target[actionInfo.axis], amountToTravel);
 }
 
-
-function onPress(key) {
+function onKeyUp(key) {
   const activeFan = Fan.activeFan;
-  switch (key) {
-    case 'w':
+  const keyCode = key.keyCode;
+  switch (keyCode) {
+    case 87: //w
       activeFan.soak = false;
       activeFan.blow = true;
       break;
-    case 's':
+    case 83: //s
       activeFan.blow = false;
       activeFan.soak = true;
       break;
-    case '1':
+    case 49: //1
       activeFan.force = activeFan.defaultForce;
       break;
-    case '2':
+    case 50: //2
       activeFan.force = activeFan.defaultForce * 2;
       break;
-    case '3':
+    case 51: //3
       activeFan.force = activeFan.defaultForce * 3;
       break;
-    default:
+    case 32: //Spacebar
       Fan.stopActiveFan();
   }
 }

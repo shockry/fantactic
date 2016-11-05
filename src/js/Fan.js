@@ -18,6 +18,7 @@ function createFan(position, name, img, {rotation = 0, active = false} = {}) {
   fan.name = name;
   fan.anchor.setTo(0.5, 0.5);
   fan.body.immovable = true;
+  fan.body.collideWorldBounds = true;
   // fan.body.allowRotation = true;
   fan.angle = rotation;
   fan.blow = false;
