@@ -1,4 +1,5 @@
 import {game} from './game';
+import {doOperation} from './lib/mathEffect';
 //TODO: Maybe add default force to the group itself
 let fans;
 
@@ -12,14 +13,24 @@ function init() {
 }
 
 function createFan(position, name, img, {rotation = 0, active = false} = {}) {
-  const fan = fans.create(position.x + game.cache.getImage(img).width/2,
-      position.y + game.cache.getImage(img).height/2, img);
+  const fan = fans.create(position.x, position.y, img);
 
   fan.name = name;
-  fan.anchor.setTo(0.5, 0.5);
-  fan.body.immovable = true;
+  // fan.body.immovable = true;
   fan.body.collideWorldBounds = true;
-  // fan.body.allowRotation = true;
+  fan.input.enableDrag();
+  if (img === 'box-rotated') { //Side fan
+    fan.input.allowHorizontalDrag = false;
+    const bounds = new Phaser.Rectangle(0, 0,
+      game.cache.getImage(img).width, game.world.height);
+    fan.input.boundsRect = bounds;
+  } else {
+    fan.input.allowVerticalDrag = false;
+    const bounds = new Phaser.Rectangle(0, position.y,
+      game.world.width, game.cache.getImage(img).height);
+    fan.input.boundsRect = bounds;
+  }
+  fan.events.onDragUpdate.add(fanMovementJudge, this);
   fan.angle = rotation;
   fan.blow = false;
   fan.soak = false;
@@ -66,10 +77,29 @@ function getActiveFan() {
   return fans.getTop();
 }
 
+//stops fan drag and retreat back a little to enable it again
+function stopFanMovement(fan, axis, operator) {
+  fan.input.disableDrag();
+  fan.body.velocity.set(0, 0);
+  fan[axis] = doOperation(operator, fan[axis], 0.1);
+  fan.input.enableDrag();
+}
+
+function fanMovementJudge(fan) {
+  if (fan.name === 'sideFan' &&
+    fan.y + fan.height >= fans.getByName('bottomFan').y) {
+    stopFanMovement(fan, 'y', '-');
+  } else if (fan.name === 'bottomFan' &&
+      fan.x <= fans.getByName('sideFan').x + fans.getByName('sideFan').width) {
+    stopFanMovement(fan, 'x', '+');
+  }
+}
+
 export default {
   init,
   get fans() {return fans},
   createFan,
   stopActiveFan,
+  fanMovementJudge,
   get activeFan() {return getActiveFan()},
 }

@@ -27,7 +27,6 @@ function create() {
   const sky = game.add.sprite(0, 0, 'sky');
 
   Fan.init();
-
   Fan.createFan({x: 0, y: game.world.height/2 - game.cache.getImage('box-rotated').height/2},
         'sideFan', 'box-rotated');
 
@@ -62,8 +61,8 @@ function create() {
 }
 
 function update() {
-  // game.physics.arcade.collide(stars, boxes);//, collectStar, ()=>boxes.enableCollide);//, null, this);
   game.physics.arcade.collide(stars, collectables, collect);
+  // game.physics.arcade.collide(Fan.fans, Fan.fans, Fan.stopFanMovement);
 
   const activeFan = Fan.activeFan;
   // game.debug.body(activeFan);
@@ -74,10 +73,11 @@ function update() {
       move('left', activeFan.force);
     }
     //Moving the fan itself
+    activeFan.body.velocity.y = 0;
     if (cursors.up.isDown) {
-      Fan.activeFan.y -= 2;
+      activeFan.body.velocity.y = -85;
     } else if (cursors.down.isDown) {
-      Fan.activeFan.y += 2;
+      activeFan.body.velocity.y = 85;
     }
   } else {
     if (activeFan.blow) {
@@ -86,12 +86,14 @@ function update() {
       move('down', activeFan.force);
     }
     //Moving the fan itself
+    activeFan.body.velocity.x = 0;
     if (cursors.right.isDown) {
-      Fan.activeFan.x += 2;
+      activeFan.body.velocity.x = 85;
     } else if (cursors.left.isDown) {
-      Fan.activeFan.x -= 2;
+      activeFan.body.velocity.x = -85;
     }
   }
+  Fan.fanMovementJudge(activeFan);
 }
 
 function move(direction, force) {
