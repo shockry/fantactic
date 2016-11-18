@@ -41,7 +41,6 @@ function createFan(position, name, img, {rotation = 0, active = false} = {}) {
 
     fan.input.boundsRect = bounds;
   }
-  // fan.events.onDragUpdate.add(fanMovementJudge, this);
   fan.angle = rotation;
   fan.blow = false;
   fan.soak = false;
@@ -51,10 +50,13 @@ function createFan(position, name, img, {rotation = 0, active = false} = {}) {
 
   //Last active one is the only active
   if (active) {
+    //Just a precaution, we don't want multiple green fans
     fans.forEach(function(fan) {
       setFanTint(fan, 0xFFFFFF);
     });
-    setFanTint(fan, 0x48f442);
+    setActiveFan(fan);
+  } else {
+    fan.sendToBack();
   }
 
   return fan;
@@ -62,9 +64,11 @@ function createFan(position, name, img, {rotation = 0, active = false} = {}) {
 
 function setActiveFan(fan) {
   //Revert current active fan properties
-  stopActiveFan();
   const currentActiveFan = getActiveFan();
-  currentActiveFan.tint = 0xFFFFFF;
+  if (currentActiveFan !== fan) {
+    stopActiveFan();
+    setFanTint(currentActiveFan, 0xFFFFFF);
+  }
   //Set new active fan
   fan.bringToTop();
   setFanTint(fan, 0x48f442);

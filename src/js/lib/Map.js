@@ -12,7 +12,6 @@ function createOneOfType(map, layer, type, group) {
   } else {
     return game.add.sprite(obj.x, obj.y, obj.properties.sprite);
   }
-
 }
 
 export default {
