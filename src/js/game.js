@@ -3,6 +3,7 @@ import 'p2';
 import Phaser from 'phaser';
 import {doOperation} from './lib/mathEffect';
 import Fan from './Fan';
+import Map from './lib/Map';
 
 export const game = new Phaser.Game(800, 600, Phaser.AUTO, '',
     {preload: preload, create: create, update: update});
@@ -20,36 +21,53 @@ function preload() {
   game.load.image('box', 'src/assets/images/carton-box.png');
   game.load.image('box-rotated', 'src/assets/images/carton-box-rotated.png');
   game.load.image('collectable', 'src/assets/images/jelly.png');
+  game.load.tilemap('level1', 'src/assets/levels/tester.json', null, Phaser.Tilemap.TILED_JSON);
+  game.load.image('gameTiles', 'src/assets/images/tilesheet.png');
 }
 
 function create() {
   game.physics.startSystem(Phaser.Physics.ARCADE);
-  const sky = game.add.sprite(0, 0, 'sky');
+  // const sky = game.add.sprite(0, 0, 'sky');
+  game.stage.backgroundColor = '#333333';
+
+  const gameMap = game.add.tilemap('level1');
+  gameMap.addTilesetImage('tilesheet', 'gameTiles');
+
+  // const bgLayer = gameMap.createLayer('bgLayer');
+  // const objLayer = gameMap.createLayer('objectsLayer');
+  // bgLayer.resizeWorld();
 
   Fan.init();
-  Fan.createFan({x: 0, y: game.world.height/2 - game.cache.getImage('box-rotated').height/2},
-        'sideFan', 'box-rotated');
+  Fan.createFromMap(gameMap);
 
-  Fan.createFan({x: game.world.width/2, y: game.world.height - game.cache.getImage('box').height},
-      'bottomFan', 'box', {active: true});
-
+  // Fan.createFan({x: 0, y: game.world.height/2 - game.cache.getImage('box-rotated').height/2},
+  //       'sideFan', 'box-rotated');
+  //
+  // Fan.createFan({x: game.world.width/2, y: game.world.height - game.cache.getImage('box').height},
+  //     'bottomFan', 'box', {active: true});
+  //
   collectables = game.add.group();
   collectables.enableBody = true;
 
-  collectables.create(game.world.width/2 + 100, 400, 'collectable');
-
-  collectables.create(game.world.width/2 + 100, 300, 'collectable');
-
+  gameMap.createFromObjects('objectsLayer', 2, 'collectable', 0, true, false, collectables);
+  //
+  // collectables.create(game.world.width/2 + 100, 400, 'collectable');
+  //
+  // collectables.create(game.world.width/2 + 100, 300, 'collectable');
+  //
   stars = game.add.group();
   stars.enableBody = true;
+  // const thingy = gameMap.createFromObjects('objectsLayer', 4, 'star', 0, true, false, stars);
 
-  star = stars.create(game.world.width/2, 400, 'star');
-  // star.scale.setTo(2, 2);
-  // star.inputEnabled = true;
-  // star.input.enableDrag();
-  // star.body.gravity.y = 160;
-  // star.body.bounce.x = 0.2;
-  // star.body.bounce.y = 0.2;
+  star = Map.createOneOfType(gameMap, 'objectsLayer', 'target', stars);
+  //
+  // star = stars.create(game.world.width/2, 400, 'star');
+  // // star.scale.setTo(2, 2);
+  // // star.inputEnabled = true;
+  // // star.input.enableDrag();
+  // // star.body.gravity.y = 160;
+  // // star.body.bounce.x = 0.2;
+  // // star.body.bounce.y = 0.2;
   star.body.collideWorldBounds = true;
 
   game.input.keyboard.addCallbacks(this, null, onKeyUp);
@@ -62,7 +80,6 @@ function create() {
 
 function update() {
   game.physics.arcade.collide(stars, collectables, collect);
-  // game.physics.arcade.collide(Fan.fans, Fan.fans, Fan.stopFanMovement);
 
   const activeFan = Fan.activeFan;
   // game.debug.body(activeFan);

@@ -1,5 +1,6 @@
 import {game} from './game';
 import {doOperation} from './lib/mathEffect';
+import Map from './lib/Map';
 //TODO: Maybe add default force to the group itself
 let fans;
 
@@ -19,18 +20,28 @@ function createFan(position, name, img, {rotation = 0, active = false} = {}) {
   // fan.body.immovable = true;
   fan.body.collideWorldBounds = true;
   fan.input.enableDrag();
+  const complementaryImage = getComplementaryImageName(img);
+
   if (img === 'box-rotated') { //Side fan
     fan.input.allowHorizontalDrag = false;
-    const bounds = new Phaser.Rectangle(0, 0,
-      game.cache.getImage(img).width, game.world.height);
+
+    const bounds = new Phaser.Rectangle(
+      0, 0,
+      game.cache.getImage(img).width,
+      game.world.height - game.cache.getImage(complementaryImage).height);
+
     fan.input.boundsRect = bounds;
   } else {
     fan.input.allowVerticalDrag = false;
-    const bounds = new Phaser.Rectangle(0, position.y,
-      game.world.width, game.cache.getImage(img).height);
+
+    const bounds = new Phaser.Rectangle(
+      game.cache.getImage(complementaryImage).width, position.y,
+      game.world.width - game.cache.getImage(complementaryImage).width,
+      game.cache.getImage(img).height);
+
     fan.input.boundsRect = bounds;
   }
-  fan.events.onDragUpdate.add(fanMovementJudge, this);
+  // fan.events.onDragUpdate.add(fanMovementJudge, this);
   fan.angle = rotation;
   fan.blow = false;
   fan.soak = false;
@@ -95,6 +106,22 @@ function fanMovementJudge(fan) {
   }
 }
 
+function createFromMap(map) {
+  const fans = Map.findObjectsByType(map, 'objectsLayer', 'fan');
+  for (let fanObj of fans) {
+    createFan({x: fanObj.x, y: fanObj.y},
+      fanObj.name, fanObj.properties.sprite, {active: fanObj.properties.active});
+  }
+}
+
+function getComplementaryImageName(image) {
+  if (image === 'box') {
+    return 'box-rotated';
+  } else {
+    return 'box';
+  }
+}
+
 export default {
   init,
   get fans() {return fans},
@@ -102,4 +129,5 @@ export default {
   stopActiveFan,
   fanMovementJudge,
   get activeFan() {return getActiveFan()},
+  createFromMap,
 }
