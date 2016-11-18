@@ -82,6 +82,7 @@ function update() {
   game.physics.arcade.collide(stars, collectables, collect);
 
   const activeFan = Fan.activeFan;
+  const fanVelocity = 85;
   // game.debug.body(activeFan);
   if (activeFan.name === 'sideFan') {
     if (activeFan.blow) {
@@ -92,9 +93,9 @@ function update() {
     //Moving the fan itself
     activeFan.body.velocity.y = 0;
     if (cursors.up.isDown) {
-      activeFan.body.velocity.y = -85;
+      activeFan.body.velocity.y = -fanVelocity;
     } else if (cursors.down.isDown) {
-      activeFan.body.velocity.y = 85;
+      activeFan.body.velocity.y = fanVelocity;
     }
   } else {
     if (activeFan.blow) {
@@ -105,9 +106,9 @@ function update() {
     //Moving the fan itself
     activeFan.body.velocity.x = 0;
     if (cursors.right.isDown) {
-      activeFan.body.velocity.x = 85;
+      activeFan.body.velocity.x = fanVelocity;
     } else if (cursors.left.isDown) {
-      activeFan.body.velocity.x = -85;
+      activeFan.body.velocity.x = -fanVelocity;
     }
   }
   Fan.fanMovementJudge(activeFan);
