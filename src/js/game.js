@@ -17,7 +17,6 @@ const directionInfo = {'up': {axis: 'y', operator: '-'},
 
 function preload() {
   game.load.image('star', 'src/assets/images/star.png');
-  game.load.image('sky', 'src/assets/images/sky.png');
   game.load.image('box', 'src/assets/images/carton-box.png');
   game.load.image('box-rotated', 'src/assets/images/carton-box-rotated.png');
   game.load.image('collectable', 'src/assets/images/jelly.png');
@@ -27,55 +26,27 @@ function preload() {
 
 function create() {
   game.physics.startSystem(Phaser.Physics.ARCADE);
-  // const sky = game.add.sprite(0, 0, 'sky');
   game.stage.backgroundColor = '#333333';
 
   const gameMap = game.add.tilemap('level1');
   gameMap.addTilesetImage('tilesheet', 'gameTiles');
 
-  // const bgLayer = gameMap.createLayer('bgLayer');
-  // const objLayer = gameMap.createLayer('objectsLayer');
-  // bgLayer.resizeWorld();
-
   Fan.init();
   Fan.createFromMap(gameMap);
 
-  // Fan.createFan({x: 0, y: game.world.height/2 - game.cache.getImage('box-rotated').height/2},
-  //       'sideFan', 'box-rotated');
-  //
-  // Fan.createFan({x: game.world.width/2, y: game.world.height - game.cache.getImage('box').height},
-  //     'bottomFan', 'box', {active: true});
-  //
   collectables = game.add.group();
   collectables.enableBody = true;
 
   gameMap.createFromObjects('objectsLayer', 2, 'collectable', 0, true, false, collectables);
-  //
-  // collectables.create(game.world.width/2 + 100, 400, 'collectable');
-  //
-  // collectables.create(game.world.width/2 + 100, 300, 'collectable');
-  //
+
   stars = game.add.group();
   stars.enableBody = true;
-  // const thingy = gameMap.createFromObjects('objectsLayer', 4, 'star', 0, true, false, stars);
 
   star = Map.createOneOfType(gameMap, 'objectsLayer', 'target', stars);
-  //
-  // star = stars.create(game.world.width/2, 400, 'star');
-  // // star.scale.setTo(2, 2);
-  // // star.inputEnabled = true;
-  // // star.input.enableDrag();
-  // // star.body.gravity.y = 160;
-  // // star.body.bounce.x = 0.2;
-  // // star.body.bounce.y = 0.2;
   star.body.collideWorldBounds = true;
 
   game.input.keyboard.addCallbacks(this, null, onKeyUp);
   cursors = game.input.keyboard.createCursorKeys();
-
-  // box.events.onDragStart.add(dragStart, this);
-  // box.events.onDragStop.add(dragStop, this);
-  // box.events.onDragUpdate.add(dragUpdate, this);
 }
 
 function update() {
