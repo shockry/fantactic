@@ -2,8 +2,9 @@ import {game} from './game';
 import {doOperation} from './lib/mathEffect';
 import Fan from './Fan';
 import Map from './lib/Map';
+import Swipe from 'phaser-swipe';
 
-let star, collectables, stars, cursors, scoreText;
+let star, collectables, stars, cursors, scoreText, swipe;
 let score = 0;
 
 const directionInfo = {'up': {axis: 'y', operator: '-'},
@@ -37,6 +38,7 @@ function create() {
 
   game.input.keyboard.addCallbacks(this, null, onKeyUp);
   cursors = game.input.keyboard.createCursorKeys();
+  swipe = new Swipe(game);
 }
 
 function update() {
@@ -44,7 +46,10 @@ function update() {
 
   const activeFan = Fan.activeFan;
   const fanVelocity = 85;
-  // game.debug.body(activeFan);
+
+  const swipeDirection = swipe.check();
+  swipeHandler(swipeDirection);
+
   if (activeFan.name === 'sideFan') {
     if (activeFan.blow) {
       move('right', activeFan.force);
@@ -153,6 +158,51 @@ function collect(target, collectable) {
   if (collectables.length === 0) {
     Fan.stopActiveFan();
     game.state.start('win');
+  }
+}
+
+function swipeHandler(direction) {
+  if (direction !== null) {
+    switch (direction.direction){
+      case swipe.DIRECTION_UP:
+        if (Fan.activeFan.name === 'bottomFan') {
+          swipeJudge('blow');
+        }
+        break;
+      case swipe.DIRECTION_DOWN:
+        if (Fan.activeFan.name === 'bottomFan') {
+          swipeJudge('soak');
+        }
+        break;
+      case swipe.DIRECTION_LEFT:
+        if (Fan.activeFan.name === 'sideFan') {
+          swipeJudge('soak');
+        }
+        break;
+      case swipe.DIRECTION_RIGHT:
+        if (Fan.activeFan.name === 'sideFan') {
+          swipeJudge('blow');
+        }
+        break;
+    }
+  }
+}
+
+function swipeJudge(act) {
+  if (act === 'blow') {
+    if (Fan.activeFan.soak) {
+      Fan.stopActiveFan();
+    } else {
+      Fan.activeFan.soak = false;
+      Fan.activeFan.blow = true;
+    }
+  } else {
+    if (Fan.activeFan.blow) {
+      Fan.stopActiveFan();
+    } else {
+      Fan.activeFan.blow = false;
+      Fan.activeFan.soak = true;
+    }
   }
 }
 
