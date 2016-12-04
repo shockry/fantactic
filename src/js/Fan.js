@@ -5,12 +5,13 @@ import Map from './lib/Map';
 let fans;
 
 function init() {
-  if (!fans) {
-    fans = game.add.group();
-    fans.enableBody = true;
-    fans.inputEnableChildren = true;
-    fans.onChildInputUp.add(setActiveFan, this);
+  if (fans) {
+    fans.destroy();
   }
+  fans = game.add.group();
+  fans.enableBody = true;
+  fans.inputEnableChildren = true;
+  fans.onChildInputUp.add(setActiveFan, this);
 }
 
 function createFan(position, name, img, {rotation = 0, active = false} = {}) {
