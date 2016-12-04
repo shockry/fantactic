@@ -1,10 +1,11 @@
 {
-  "name": "catchup",
+  "name": "fantactic",
   "version": "1.0.0",
-  "description": "Catch objects with the box",
+  "description": "Collect objects with fan powers",
   "main": "game.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "up": "python -m SimpleHTTPServer 8000 | webpack --optimize-minimize"
   },
   "keywords": [
     "phaser"
@@ -12,7 +13,8 @@
   "author": "Shokry",
   "license": "MIT",
   "dependencies": {
-    "phaser": "^2.6.2"
+    "phaser": "^2.6.2",
+    "phaser-swipe": "^1.0.4"
   },
   "devDependencies": {
     "babel-core": "^6.17.0",
