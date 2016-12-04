@@ -20,9 +20,9 @@ function create() {
     goalText.setTextBounds(0, 150, game.width, game.height/2);
 
     let instructionsText = game.add.text(0, 0,
-      `Click the fan to select, drag or use the cursor keys to move.
-      Use 'w' to blow and 's' to soak.
-      Spacebar will stop whatever the fan is doing.
+      `Click the fan to select, drag or use the arrow keys to move.
+      Use 'w' and 's' or arrow keys to fan blowing and soaking.
+      Spacebar or the opposite arrow will stop whatever the fan is doing.
       1, 2 and 3 will change the fan force.`,
       {font: "15pt Arial", align: 'center',
         boundsAlignH: "center", boundsAlignV: "middle", fill: "#FFFFFF"});
