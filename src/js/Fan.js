@@ -127,6 +127,12 @@ function getComplementaryImageName(image) {
   }
 }
 
+function toggleActiveFan() {
+  //Get next fan, cuz active one is always on top
+  const nextFan = fans.getChildAt(0);
+  setActiveFan(nextFan);
+}
+
 export default {
   init,
   get fans() {return fans},
@@ -135,4 +141,5 @@ export default {
   fanMovementJudge,
   get activeFan() {return getActiveFan()},
   createFromMap,
+  toggleActiveFan,
 }

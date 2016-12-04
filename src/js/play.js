@@ -149,6 +149,9 @@ function onKeyUp(key) {
       break;
     case 32: //Spacebar
       Fan.stopActiveFan();
+      break;
+    case 16: //Shift
+      Fan.toggleActiveFan();
   }
 }
 

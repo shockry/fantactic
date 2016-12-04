@@ -1,7 +1,7 @@
 import {game} from './game';
 
 function preload() {
-  let text = game.add.text(0, 0, "Loading...",
+  const text = game.add.text(0, 0, "Loading...",
     {boundsAlignH: "center", boundsAlignV: "middle", fill: "#FFFFFF"});
   text.setTextBounds(0, 200, game.width, game.height/2);
 
